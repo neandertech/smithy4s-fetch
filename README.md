@@ -7,11 +7,11 @@
   - [Contributing](#contributing)
   <!--toc:end-->
 
-A [Smithy4s](https://disneystreaming.github.io/smithy4s/) client backend for [Scala.js](https://www.scala-js.org/), utilising [Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) directly, without introducing a http4s/cats dependency.
+An _experimental_ [Smithy4s](https://disneystreaming.github.io/smithy4s/) client backend for [Scala.js](https://www.scala-js.org/), utilising [Fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch) directly, without introducing a http4s/cats dependency.
 
 The purpose of this library is to provide users of Smithy4s backend services a more lightweight client for the frontend – if your Scala.js frontend is not using Cats/Cats-Effect based libraries, you can communicate with your Smithy4s backend directly using Fetch, **reducing bundle size by as much as 50% in some instances**.
 
-The library is currently only available for Scala 3, but we will welcome contributions cross-compiling it to 2.13 – it should be very easy.
+The library is currently only available for Scala 3, but we will welcome contributions cross-compiling it to 2.13 – it should be very easy. API surface is very minimal and designed for binary compatible evolution, so after initial round of testing and gathering community feedback, we plan to release 1.0.0 and start checking binary/Tasty compatibility for each release.
 
 ## Installation 
 
