@@ -13,26 +13,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - uses: coursier/cache-action@v6.3
       - uses: VirtusLab/scala-cli-setup@main
         with:
           power: true
 
-      # - name: Check formatting
-      #   run: make code-check || echo "Run `make pre-ci`"
+      - name: Check formatting
+        run: make code-check || echo "Run `make pre-ci`"
 
-      # - name: Test 
-      #   run: make test
+      - name: Test 
+        run: make test
 
-      # - name: Check documentation compiles and runs
-      #   run: make check-docs && make run-example
+      - name: Check documentation compiles and runs
+        run: make check-docs && make run-example
 
       - name: Publish snapshot 
         if: github.ref == 'refs/heads/main'
-        run: make publish
+        run: make publish-snapshot
         env:
-          PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
-          PGP_SECRET: ${{ secrets.PGP_SECRET }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
 
