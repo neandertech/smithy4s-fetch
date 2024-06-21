@@ -5,7 +5,7 @@ test:
 	scala-cli test .
 
 publish-snapshot:
-	scala-cli config publish.credentials s01.oss.sonatype.org env:SONATYPE_USER env:SONATYPE_PASSWORD
+	scala-cli config publish.credentials s01.oss.sonatype.org env:SONATYPE_USERNAME env:SONATYPE_PASSWORD
 	scala-cli publish . -S 3.3.3 --signer none
 
 publish:
