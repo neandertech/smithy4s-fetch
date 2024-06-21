@@ -80,3 +80,4 @@ Here are some useful commands:
 - `make test` – run tests
 - `make check-docs` – verify that snippets in `README.md` (this file) compile
 - `make pre-ci` – format the code so that it passes CI check
+- `make run-example` – run example from README against real https://httpbin.org
