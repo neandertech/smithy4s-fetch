@@ -75,7 +75,9 @@ If your locally installed Node.js version is higher than 18 (version where `fetc
 
 If you see something that can be improved in this library – please contribute!
 
-This is a relatively is
+This is a relatively standard Scala CLI project, even though the tests run a 
+Scala version newer than the library itself (library is published for 3.3, tests are 
+in 3.4, to make use of smithy4s-deriving).
 
 Here are some useful commands:
 
