@@ -12,5 +12,6 @@
 //> using publish.license Apache-2.0
 //> using publish.developer "velvetbaldmime|Anton Sviridov|https://indoorvivants.com"
 //> using publish.vcs github:neandertech/smithy4s-fetch
+//> using publish.url https://github.com/neandertech/smithy4s-fetch
 //> using scala 3.3.3
 //> using jsModuleKind es
