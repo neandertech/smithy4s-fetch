@@ -13,7 +13,9 @@ The purpose of this library is to provide users of Smithy4s backend services a m
 
 The library is currently only available for Scala 3, but we will welcome contributions cross-compiling it to 2.13 – it should be very easy. API surface is very minimal and designed for binary compatible evolution, so after initial round of testing and gathering community feedback, we plan to release 1.0.0 and start checking binary/Tasty compatibility for each release.
 
-## Installation 
+## Installation
+
+Latest version: [![smithy4s-fetch Scala version support](https://index.scala-lang.org/neandertech/smithy4s-fetch/smithy4s-fetch/latest.svg)](https://index.scala-lang.org/neandertech/smithy4s-fetch/smithy4s-fetch)
 
 - **SBT**: `libraryDependencies += "tech.neander" %%% "smithy4s-fetch" % "<latest version>"`
 - **Scala CLI**: `//> using dep tech.neander::smithy4s-fetch::<latest version>`
