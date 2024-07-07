@@ -24,6 +24,7 @@ import weaver.{FunSuiteIO, IOSuite}
 import scala.concurrent.duration.*
 import scala.scalajs.js.Promise
 import smithy4s.http.HttpUri
+import org.scalajs.dom.URL
 
 object UnitTest extends FunSuiteIO:
   val uri =
@@ -71,6 +72,44 @@ object UnitTest extends FunSuiteIO:
     expect.same(
       enc(uri.copy(queryParams = Map.empty, path = Vector("1", "2", "3"))),
       "https://localhost:9999/1/2/3"
+    )
+
+  test("Base URI with no path prefix"):
+    val result = smithy4s_fetch.SimpleRestJsonCodecs
+      .toSmithy4sHttpUri(new URL("http://localhost"))
+      .path
+
+    expect(result.isEmpty)
+
+  test("Base URI with no path prefix (with slash)"):
+    val result = smithy4s_fetch.SimpleRestJsonCodecs
+      .toSmithy4sHttpUri(new URL("http://localhost/"))
+      .path
+
+    expect(result.isEmpty)
+
+  test("Base URI with path prefix"):
+    expect.same(
+      smithy4s_fetch.SimpleRestJsonCodecs
+        .toSmithy4sHttpUri(new URL("http://localhost/prefix"))
+        .path,
+      IndexedSeq("prefix")
+    )
+
+  test("Base URI with no path prefix, including empty segments"):
+    expect.same(
+      smithy4s_fetch.SimpleRestJsonCodecs
+        .toSmithy4sHttpUri(new URL("http://localhost/foo//bar//baz/"))
+        .path,
+      IndexedSeq("foo", "", "bar", "", "baz")
+    )
+
+  test("Base URI with path prefix, trailing slash doesn't matter"):
+    expect.same(
+      smithy4s_fetch.SimpleRestJsonCodecs
+        .toSmithy4sHttpUri(new URL("http://localhost/foo/")),
+      smithy4s_fetch.SimpleRestJsonCodecs
+        .toSmithy4sHttpUri(new URL("http://localhost/foo"))
     )
 
 @annotation.experimental

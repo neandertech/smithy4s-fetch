@@ -137,7 +137,7 @@ private[smithy4s_fetch] case class SimpleRestJsonCodecs(
 
   def fromSmithy4sHttpUri(uri: smithy4s.http.HttpUri): String = {
     val qp = uri.queryParams
-    val newValue = {
+    val protocol = {
       uri.scheme match
         case Http  => "http"
         case Https => "https"
@@ -167,7 +167,7 @@ private[smithy4s_fetch] case class SimpleRestJsonCodecs(
 
         b
 
-    s"$newValue://$hostName$port$path$query"
+    s"$protocol://$hostName$port$path$query"
   }
 
   def toSmithy4sHttpResponse(
@@ -233,7 +233,14 @@ private[smithy4s_fetch] case class SimpleRestJsonCodecs(
       uriScheme,
       uri.host,
       uri.port.toIntOption,
-      uri.pathname.split("/"),
+      uri.pathname
+        // drop the guaranteed leading slash, so that we don't produce an empty segment for it
+        .tail
+        // splitting an empty path would produce a single element, so we special-case to empty
+        .match {
+          case ""    => IndexedSeq.empty
+          case other => other.split("/")
+        },
       uri.searchParams
         .entries()
         .toIterator
