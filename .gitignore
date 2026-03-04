@@ -28,3 +28,8 @@ dist-ssr
 .metals
 .bsp
 scalajs-frontend.js
+
+# sbt
+target/
+project/target/
+project/project/

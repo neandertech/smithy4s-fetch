@@ -1,47 +1,42 @@
 name: CI
+
 on:
+  pull_request:
+    branches: ["*"]
   push:
     branches: ["main"]
     tags: ["v*"]
-  pull_request:
-    branches: ["*"]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - uses: coursier/cache-action@v6
-      - uses: VirtusLab/scala-cli-setup@main
+
+      - uses: actions/setup-java@v3
         with:
-          power: true
+          distribution: "temurin"
+          java-version: "21"
+          cache: "sbt"
 
-      - name: Check formatting
-        run: make code-check || echo "Run `make pre-ci`"
+      - name: Setup sbt
+        uses: sbt/setup-sbt@v1
 
-      - name: Test 
-        run: make test
+      - name: Test
+        run: sbt ci
 
-      - name: Check documentation compiles and runs
-        run: make check-docs && make run-example
-
-      - name: Publish snapshot 
-        if: github.ref == 'refs/heads/main'
-        run: make publish-snapshot
-        env:
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-
-      - name: Publish 
-        if: startsWith(github.ref, 'refs/tags/v') 
-        run: make publish
+      - name: Publish ${{ github.ref }}
+        # todo: uncomment
+        # if: github.event_name != 'pull_request' && (startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main'))
+        run: sbt ci-release
         env:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-
