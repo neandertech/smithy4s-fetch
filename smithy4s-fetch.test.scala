@@ -1,8 +1,8 @@
 //> using test.dep com.disneystreaming::weaver-cats::0.8.4
-//> using test.dep "tech.neander::smithy4s-deriving::0.0.2"
-//> using test.dep com.disneystreaming.smithy4s::smithy4s-http4s::0.18.22
-//> using test.dep org.http4s::http4s-ember-server::0.23.27
-//> using test.dep org.http4s::http4s-ember-client::0.23.27
+//> using test.dep "tech.neander::smithy4s-deriving::0.0.3"
+//> using test.dep com.disneystreaming.smithy4s::smithy4s-http4s::0.19.2
+//> using test.dep org.http4s::http4s-ember-server::0.23.34
+//> using test.dep org.http4s::http4s-ember-client::0.23.34
 //> using testFramework "weaver.framework.CatsEffect"
 //> using scala 3.4.2
 
