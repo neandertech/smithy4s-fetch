@@ -139,13 +139,14 @@ private[smithy4s_fetch] case class SimpleRestJsonCodecs(
     val qp = uri.queryParams
     val protocol = {
       uri.scheme match
-        case Http  => "http"
-        case Https => "https"
+        case Some(Http)  => "http"
+        case Some(Https) => "https"
+        case None        => ""
     }
-    val hostName = uri.host
+    val hostName = uri.host.getOrElse("")
     val port =
       uri.port
-        .filterNot(p => uri.host.endsWith(s":$p"))
+        .filterNot(p => uri.host.exists(_.endsWith(s":$p")))
         .map(":" + _.toString)
         .getOrElse("")
 
@@ -155,15 +156,10 @@ private[smithy4s_fetch] case class SimpleRestJsonCodecs(
       else
         var b = "?"
         qp.zipWithIndex.map:
-          case ((key, values), idx) =>
+          case ((key, value), idx) =>
             if idx != 0 then b += "&"
             b += key
-            for
-              i <- 0 until values.length
-              value = values(i)
-            do
-              if i == 0 then b += "=" + value
-              else b += s"&$key=$value"
+            value.foreach(v => b += "=" + v)
 
         b
 
@@ -229,7 +225,7 @@ private[smithy4s_fetch] case class SimpleRestJsonCodecs(
         )
     }
 
-    HttpUri(
+    HttpUri.absolute(
       uriScheme,
       uri.host,
       uri.port.toIntOption,
@@ -239,24 +235,28 @@ private[smithy4s_fetch] case class SimpleRestJsonCodecs(
         // splitting an empty path would produce a single element, so we special-case to empty
         .match {
           case ""    => IndexedSeq.empty
-          case other => other.split("/")
+          case other => other.split("/").toIndexedSeq
         },
       uri.searchParams
         .entries()
         .toIterator
         .toSeq
-        .groupMap(_._1)(_._2)
-        .toMap,
+        .map(t => t._1.toString -> Some(t._2.toString))
+        .toIndexedSeq,
       pathParams
     )
   }
+
+  private val explicitDefaultsFieldFilter =
+    if explicitDefaultsEncoding then smithy4s.schema.FieldFilter.EncodeAll
+    else smithy4s.schema.FieldFilter.Default
 
   val jsonCodecs = Json.payloadCodecs
     .withJsoniterCodecCompiler(
       Json.jsoniter
         .withHintMask(hintMask)
         .withMaxArity(maxArity)
-        .withExplicitDefaultsEncoding(explicitNulls = true)
+        .withFieldFilter(explicitDefaultsFieldFilter)
     )
 
   val payloadEncoders: BlobEncoder.Compiler =
@@ -288,9 +288,7 @@ private[smithy4s_fetch] case class SimpleRestJsonCodecs(
       )
       .withMetadataDecoders(Metadata.Decoder)
       .withMetadataEncoders(
-        Metadata.Encoder.withExplicitDefaultsEncoding(
-          explicitDefaultsEncoding
-        )
+        Metadata.Encoder.withFieldFilter(explicitDefaultsFieldFilter)
       )
       .withBaseRequest(_ => Promise.resolve(baseRequest))
       .withRequestMediaType("application/json")

@@ -28,13 +28,15 @@ import org.scalajs.dom.URL
 
 object UnitTest extends FunSuiteIO:
   val uri =
-    smithy4s.http.HttpUri(
+    smithy4s.http.HttpUri.absolute(
       scheme = HttpUriScheme.Https,
       path = Vector("hello", "world"),
-      queryParams = Map(
-        "k" -> Seq.empty,
-        "k2" -> Seq("hello"),
-        "k3" -> Seq("hello", "world", "!")
+      queryParams = Vector(
+        "k" -> None,
+        "k2" -> Some("hello"),
+        "k3" -> Some("hello"),
+        "k3" -> Some("world"),
+        "k3" -> Some("!")
       ),
       host = "localhost",
       pathParams = None,
@@ -50,27 +52,27 @@ object UnitTest extends FunSuiteIO:
       "https://localhost:9999/hello/world?k&k2=hello&k3=hello&k3=world&k3=!"
     ) &&
     expect.same(
-      enc(uri.copy(queryParams = Map.empty)),
+      enc(uri.withoutQueryParams),
       "https://localhost:9999/hello/world"
     ) &&
     expect.same(
-      enc(uri.copy(queryParams = Map.empty, scheme = HttpUriScheme.Http)),
+      enc(uri.withoutQueryParams.transformOrigin(_.withScheme(HttpUriScheme.Http))),
       "http://localhost:9999/hello/world"
     ) &&
     expect.same(
-      enc(uri.copy(queryParams = Map.empty, host = "hello.com")),
+      enc(uri.withoutQueryParams.withHost("hello.com")),
       "https://hello.com:9999/hello/world"
     ) &&
     expect.same(
-      enc(uri.copy(queryParams = Map.empty, port = None)),
+      enc(uri.withoutQueryParams.transformOrigin(_.withoutPort)),
       "https://localhost/hello/world"
     ) &&
     expect.same(
-      enc(uri.copy(queryParams = Map.empty, path = Vector.empty)),
+      enc(uri.withoutQueryParams.withPath(Vector.empty)),
       "https://localhost:9999/"
     ) &&
     expect.same(
-      enc(uri.copy(queryParams = Map.empty, path = Vector("1", "2", "3"))),
+      enc(uri.withoutQueryParams.withPath(Vector("1", "2", "3"))),
       "https://localhost:9999/1/2/3"
     )
 
