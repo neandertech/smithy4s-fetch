@@ -6,19 +6,22 @@ check-docs:
 compile:
 	scala-cli compile . --scala $(SCALA_VERSION)
 
+doc:
+	scala-cli doc . --scala $(SCALA_VERSION) -o .scala-build/doc-$(SCALA_VERSION) --force
+
 test:
 	scala-cli test . --scala 3.4.2
 
 publish-snapshot:
 	scala-cli config publish.credentials central.sonatype.com env:SONATYPE_USERNAME env:SONATYPE_PASSWORD
 	scala-cli config publish.credentials ossrh-staging-api.central.sonatype.com env:SONATYPE_USERNAME env:SONATYPE_PASSWORD
-	scala-cli publish . -S 3.3.7 --signer none --doc=false
+	scala-cli publish . -S 3.3.7 --signer none
 
 publish:
 	scala-cli config publish.credentials central.sonatype.com env:SONATYPE_USERNAME env:SONATYPE_PASSWORD
 	scala-cli config publish.credentials ossrh-staging-api.central.sonatype.com env:SONATYPE_USERNAME env:SONATYPE_PASSWORD
 	./.github/workflows/import-gpg.sh
-	scala-cli publish . -S 3.3.7 --signer gpg --gpg-key 15A7215B6CD4016A --doc=false
+	scala-cli publish . -S 3.3.7 --signer gpg --gpg-key 15A7215B6CD4016A
 
 code-check:
 	scala-cli fmt . --check

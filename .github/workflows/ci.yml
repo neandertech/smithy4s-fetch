@@ -28,6 +28,9 @@ jobs:
       - name: Compile
         run: make compile SCALA_VERSION=${{ matrix.scala }}
 
+      - name: Build docs
+        run: make doc SCALA_VERSION=${{ matrix.scala }}
+
       - name: Test
         if: matrix.scala == '3.4.2'
         run: make test
