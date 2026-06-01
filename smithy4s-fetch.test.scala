@@ -3,8 +3,9 @@
 //> using test.dep com.disneystreaming.smithy4s::smithy4s-http4s::0.19.7
 //> using test.dep org.http4s::http4s-ember-server::0.23.34
 //> using test.dep org.http4s::http4s-ember-client::0.23.34
-//> using scala 3.4.2
 
+// Note: editor support may be lacking here, because we need a more recent Scala version to run smithy4s-deriving.
+// For the time being (as in, while the main code is published for Scala 3.3 LTS), tests should be run with `make test`.
 package smithy4s_fetch.tests
 
 import cats.effect.IO
