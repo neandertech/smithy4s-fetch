@@ -1,11 +1,12 @@
-//> using test.dep com.disneystreaming::weaver-cats::0.8.4
-//> using test.dep "tech.neander::smithy4s-deriving::0.0.2"
-//> using test.dep com.disneystreaming.smithy4s::smithy4s-http4s::0.18.22
-//> using test.dep org.http4s::http4s-ember-server::0.23.27
-//> using test.dep org.http4s::http4s-ember-client::0.23.27
-//> using testFramework "weaver.framework.CatsEffect"
-//> using scala 3.4.2
+//> using test.dep org.typelevel::weaver-cats::0.12.0
+//> using test.dep "tech.neander::smithy4s-deriving::0.0.4"
+//> using test.dep com.disneystreaming.smithy4s::smithy4s-http4s::0.19.7
+//> using test.dep org.http4s::http4s-ember-server::0.23.34
+//> using test.dep org.http4s::http4s-ember-client::0.23.34
+//> using testFramework weaver.framework.CatsEffect
 
+// Note: editor support may be lacking here, because we need a more recent Scala version to run smithy4s-deriving.
+// For the time being (as in, while the main code is published for Scala 3.3 LTS), tests should be run with `make test`.
 package smithy4s_fetch.tests
 
 import cats.effect.IO
@@ -28,13 +29,15 @@ import org.scalajs.dom.URL
 
 object UnitTest extends FunSuiteIO:
   val uri =
-    smithy4s.http.HttpUri(
+    smithy4s.http.HttpUri.absolute(
       scheme = HttpUriScheme.Https,
       path = Vector("hello", "world"),
-      queryParams = Map(
-        "k" -> Seq.empty,
-        "k2" -> Seq("hello"),
-        "k3" -> Seq("hello", "world", "!")
+      queryParams = Vector(
+        "k" -> None,
+        "k2" -> Some("hello"),
+        "k3" -> Some("hello"),
+        "k3" -> Some("world"),
+        "k3" -> Some("!")
       ),
       host = "localhost",
       pathParams = None,
@@ -50,27 +53,29 @@ object UnitTest extends FunSuiteIO:
       "https://localhost:9999/hello/world?k&k2=hello&k3=hello&k3=world&k3=!"
     ) &&
     expect.same(
-      enc(uri.copy(queryParams = Map.empty)),
+      enc(uri.withoutQueryParams),
       "https://localhost:9999/hello/world"
     ) &&
     expect.same(
-      enc(uri.copy(queryParams = Map.empty, scheme = HttpUriScheme.Http)),
+      enc(
+        uri.withoutQueryParams.transformOrigin(_.withScheme(HttpUriScheme.Http))
+      ),
       "http://localhost:9999/hello/world"
     ) &&
     expect.same(
-      enc(uri.copy(queryParams = Map.empty, host = "hello.com")),
+      enc(uri.withoutQueryParams.withHost("hello.com")),
       "https://hello.com:9999/hello/world"
     ) &&
     expect.same(
-      enc(uri.copy(queryParams = Map.empty, port = None)),
+      enc(uri.withoutQueryParams.transformOrigin(_.withoutPort)),
       "https://localhost/hello/world"
     ) &&
     expect.same(
-      enc(uri.copy(queryParams = Map.empty, path = Vector.empty)),
+      enc(uri.withoutQueryParams.withPath(Vector.empty)),
       "https://localhost:9999/"
     ) &&
     expect.same(
-      enc(uri.copy(queryParams = Map.empty, path = Vector("1", "2", "3"))),
+      enc(uri.withoutQueryParams.withPath(Vector("1", "2", "3"))),
       "https://localhost:9999/1/2/3"
     )
 

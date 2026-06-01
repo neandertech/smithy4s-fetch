@@ -10,6 +10,8 @@ jobs:
   build:
     strategy:
       fail-fast: false
+      matrix:
+        scala: ["3.3.7", "3.4.2"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,25 +25,29 @@ jobs:
       - name: Check formatting
         run: make code-check || echo "Run `make pre-ci`"
 
-      - name: Test 
+      - name: Compile
+        run: make compile SCALA_VERSION=${{ matrix.scala }}
+
+      - name: Test
+        if: matrix.scala == '3.4.2'
         run: make test
 
       - name: Check documentation compiles and runs
-        run: make check-docs && make run-example
+        if: matrix.scala == '3.4.2'
+        run: make check-docs SCALA_VERSION=${{ matrix.scala }} && make run-example SCALA_VERSION=${{ matrix.scala }}
 
-      - name: Publish snapshot 
-        if: github.ref == 'refs/heads/main'
+      - name: Publish snapshot
+        if: github.ref == 'refs/heads/main' && matrix.scala == '3.3.7'
         run: make publish-snapshot
         env:
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
 
-      - name: Publish 
-        if: startsWith(github.ref, 'refs/tags/v') 
+      - name: Publish
+        if: startsWith(github.ref, 'refs/tags/v') && matrix.scala == '3.3.7'
         run: make publish
         env:
           PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
           PGP_SECRET: ${{ secrets.PGP_SECRET }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-
