@@ -25,26 +25,6 @@ import scalajs.js.JSConverters.*
 import smithy4s.http.HttpDiscriminator
 import org.scalajs.dom.RequestInit
 
-@js.native
-private trait PromiseOps[+A] extends js.Object:
-  @JSName("then")
-  def thenJs[B](
-      onFulfilled: js.Function1[A, B | Promise[B]]
-  ): Promise[B] = js.native
-
-  @JSName("catch")
-  def catchJs[B >: A](
-      onRejected: js.Function1[Any, B | Promise[B]]
-  ): Promise[B] = js.native
-
-extension [A](p: Promise[A])
-  private inline def thenJs[B](f: A => B | Promise[B]): Promise[B] =
-    p.asInstanceOf[PromiseOps[A]].thenJs(f)
-  private inline def catchJs[B >: A](
-      f: Any => B | Promise[B]
-  ): Promise[B] =
-    p.asInstanceOf[PromiseOps[A]].catchJs(f)
-
 class SimpleRestJsonFetchClient[
     Alg[_[_, _, _, _, _]]
 ] private[smithy4s_fetch] (
@@ -357,3 +337,29 @@ given MonadThrowLike[Promise] with
         case (Left(x), Right(y)) => f(x, y)
         case (Right(y), Left(x)) => f(x, y)
         case _                   => ???
+
+// Workaround for a scaladoc TASTy reader bug that fails with
+// `undefined: <ref>.then at readTasty` on direct calls to js.Promise#`then`
+// (and `catch`), reproducible on Scala 3.3.x and 3.4.x. Likely related to
+// https://github.com/scala/scala3/issues/23511. Routing the call through a
+// @JSName alias keeps the names scaladoc walks free of the problematic
+// backtick reference.
+@js.native
+private trait PromiseOps[+A] extends js.Object:
+  @JSName("then")
+  def thenJs[B](
+      onFulfilled: js.Function1[A, B | Promise[B]]
+  ): Promise[B] = js.native
+
+  @JSName("catch")
+  def catchJs[B >: A](
+      onRejected: js.Function1[Any, B | Promise[B]]
+  ): Promise[B] = js.native
+
+extension [A](p: Promise[A])
+  private inline def thenJs[B](f: A => B | Promise[B]): Promise[B] =
+    p.asInstanceOf[PromiseOps[A]].thenJs(f)
+  private inline def catchJs[B >: A](
+      f: Any => B | Promise[B]
+  ): Promise[B] =
+    p.asInstanceOf[PromiseOps[A]].catchJs(f)
