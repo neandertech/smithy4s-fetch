@@ -1,9 +1,8 @@
-//> using test.dep org.typelevel::weaver-test::0.12.0
+//> using test.dep org.typelevel::weaver-cats::0.12.0
 //> using test.dep "tech.neander::smithy4s-deriving::0.0.4"
 //> using test.dep com.disneystreaming.smithy4s::smithy4s-http4s::0.19.7
 //> using test.dep org.http4s::http4s-ember-server::0.23.34
 //> using test.dep org.http4s::http4s-ember-client::0.23.34
-//> using testFramework "weaver.framework.CatsEffect"
 //> using scala 3.4.2
 
 package smithy4s_fetch.tests
@@ -56,7 +55,9 @@ object UnitTest extends FunSuiteIO:
       "https://localhost:9999/hello/world"
     ) &&
     expect.same(
-      enc(uri.withoutQueryParams.transformOrigin(_.withScheme(HttpUriScheme.Http))),
+      enc(
+        uri.withoutQueryParams.transformOrigin(_.withScheme(HttpUriScheme.Http))
+      ),
       "http://localhost:9999/hello/world"
     ) &&
     expect.same(
