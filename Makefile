@@ -21,7 +21,7 @@ publish:
 	scala-cli config publish.credentials central.sonatype.com env:SONATYPE_USERNAME env:SONATYPE_PASSWORD
 	scala-cli config publish.credentials ossrh-staging-api.central.sonatype.com env:SONATYPE_USERNAME env:SONATYPE_PASSWORD
 	./.github/workflows/import-gpg.sh
-	scala-cli publish . -S 3.3.7 --signer gpg --gpg-key 15A7215B6CD4016A
+	scala-cli publish . -S 3.3.7 --signer gpg --gpg-key 9D8EF0F74E5D78A3
 
 code-check:
 	scala-cli fmt . --check
