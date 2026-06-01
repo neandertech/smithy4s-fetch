@@ -10,13 +10,15 @@ test:
 	scala-cli test . --scala 3.4.2
 
 publish-snapshot:
-	scala-cli config publish.credentials s01.oss.sonatype.org env:SONATYPE_USERNAME env:SONATYPE_PASSWORD
-	scala-cli publish . -S 3.3.7 --signer none
+	scala-cli config publish.credentials central.sonatype.com env:SONATYPE_USERNAME env:SONATYPE_PASSWORD
+	scala-cli config publish.credentials ossrh-staging-api.central.sonatype.com env:SONATYPE_USERNAME env:SONATYPE_PASSWORD
+	scala-cli publish . -S 3.3.7 --signer none --doc=false
 
 publish:
-	scala-cli config publish.credentials s01.oss.sonatype.org env:SONATYPE_USERNAME env:SONATYPE_PASSWORD
+	scala-cli config publish.credentials central.sonatype.com env:SONATYPE_USERNAME env:SONATYPE_PASSWORD
+	scala-cli config publish.credentials ossrh-staging-api.central.sonatype.com env:SONATYPE_USERNAME env:SONATYPE_PASSWORD
 	./.github/workflows/import-gpg.sh
-	scala-cli publish . -S 3.3.7 --signer gpg --gpg-key 15A7215B6CD4016A
+	scala-cli publish . -S 3.3.7 --signer gpg --gpg-key 15A7215B6CD4016A --doc=false
 
 code-check:
 	scala-cli fmt . --check
