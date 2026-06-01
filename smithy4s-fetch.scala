@@ -16,7 +16,9 @@ import smithy4s.http.{
 import smithy4s.json.Json
 import smithy4s.{Blob, Endpoint}
 
+import scala.scalajs.js
 import scala.scalajs.js.Promise
+import scala.scalajs.js.annotation.JSName
 import scala.scalajs.js.typedarray.Int8Array
 
 import scalajs.js.JSConverters.*
@@ -94,7 +96,7 @@ object SimpleRestJsonFetchClient {
       override def run[Output](request: RequestInfo)(
           responseCB: Response => Promise[Output]
       ): Promise[Output] =
-        fetch(request).`then`(resp => responseCB(resp))
+        fetch(request).thenJs(resp => responseCB(resp))
     }
 }
 
@@ -171,7 +173,7 @@ private[smithy4s_fetch] case class SimpleRestJsonCodecs(
   ): Promise[smithy4s.http.HttpResponse[Blob]] = {
     resp
       .arrayBuffer()
-      .`then`: body =>
+      .thenJs: body =>
         val headers = Map.newBuilder[CaseInsensitive, Seq[String]]
 
         resp.headers.foreach:
@@ -305,14 +307,14 @@ private[smithy4s_fetch] case class SimpleRestJsonCodecs(
 }
 
 given MonadThrowLike[Promise] with
-  override def map[A, B](fa: Promise[A])(f: A => B): Promise[B] = fa.`then`(f)
+  override def map[A, B](fa: Promise[A])(f: A => B): Promise[B] = fa.thenJs(f)
 
   override def flatMap[A, B](fa: Promise[A])(f: A => Promise[B]): Promise[B] =
-    fa.`then`(f)
+    fa.thenJs(f)
 
   override def handleErrorWith[A](fa: Promise[A])(
       f: Throwable => Promise[A]
-  ): Promise[A] = fa.`catch`:
+  ): Promise[A] = fa.catchJs:
     case ex: Throwable => f(ex) // TODO: does this make sense?
 
   override def pure[A](a: A): Promise[A] = Promise.resolve(a)
@@ -322,16 +324,42 @@ given MonadThrowLike[Promise] with
   override def zipMapAll[A](seq: IndexedSeq[Promise[Any]])(
       f: IndexedSeq[Any] => A
   ): Promise[A] =
-    Promise.all(seq.toJSIterable).`then`(res => Promise.resolve(f(res.toArray)))
+    Promise.all(seq.toJSIterable).thenJs(res => Promise.resolve(f(res.toArray)))
 
   override def zipMap[A, B, C](fa: Promise[A], fb: Promise[B])(
       f: (A, B) => C
   ): Promise[C] = Promise
     .all[Either[A, B]](
-      Seq(fa.`then`(Left(_)), fb.`then`(Right(_))).toJSIterable
+      Seq(fa.thenJs(Left(_)), fb.thenJs(Right(_))).toJSIterable
     )
-    .`then`: arr =>
+    .thenJs: arr =>
       (arr(0), arr(1)) match
         case (Left(x), Right(y)) => f(x, y)
         case (Right(y), Left(x)) => f(x, y)
         case _                   => ???
+
+// Workaround for a scaladoc TASTy reader bug that fails with
+// `undefined: <ref>.then at readTasty` on direct calls to js.Promise#`then`
+// (and `catch`), reproducible on Scala 3.3.x and 3.4.x. Likely related to
+// https://github.com/scala/scala3/issues/23511. Routing the call through a
+// @JSName alias keeps the names scaladoc walks free of the problematic
+// backtick reference.
+@js.native
+private trait PromiseOps[+A] extends js.Object:
+  @JSName("then")
+  def thenJs[B](
+      onFulfilled: js.Function1[A, B | Promise[B]]
+  ): Promise[B] = js.native
+
+  @JSName("catch")
+  def catchJs[B >: A](
+      onRejected: js.Function1[Any, B | Promise[B]]
+  ): Promise[B] = js.native
+
+extension [A](p: Promise[A])
+  private inline def thenJs[B](f: A => B | Promise[B]): Promise[B] =
+    p.asInstanceOf[PromiseOps[A]].thenJs(f)
+  private inline def catchJs[B >: A](
+      f: Any => B | Promise[B]
+  ): Promise[B] =
+    p.asInstanceOf[PromiseOps[A]].catchJs(f)
