@@ -6,12 +6,12 @@ test:
 
 publish-snapshot:
 	scala-cli config publish.credentials s01.oss.sonatype.org env:SONATYPE_USERNAME env:SONATYPE_PASSWORD
-	scala-cli publish . -S 3.3.3 --signer none
+	scala-cli publish . -S 3.3.7 --signer none
 
 publish:
 	scala-cli config publish.credentials s01.oss.sonatype.org env:SONATYPE_USERNAME env:SONATYPE_PASSWORD
 	./.github/workflows/import-gpg.sh
-	scala-cli publish . -S 3.3.3 --signer gpg --gpg-key 15A7215B6CD4016A
+	scala-cli publish . -S 3.3.7 --signer gpg --gpg-key 15A7215B6CD4016A
 
 code-check:
 	scala-cli fmt . --check
